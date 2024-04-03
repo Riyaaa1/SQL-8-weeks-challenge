@@ -38,9 +38,21 @@ UPDATE updated_customer_orders SET extras = NULL where extras = '';
 SELECT COUNT(pizza_id)
 FROM updated_customer_orders;
 
+/*
+    |COUNT(PIZZA_ID)|
+    |---------------|              
+    |14             |
+*/
+
 -- 2. How many unique customer orders were made?
 SELECT COUNT(DISTINCT(customer_id))
 FROM updated_customer_orders;
+
+/*
+    |COUNT(DISTINCT(CUSTOMER_ID))|
+    |----------------------------|              
+    |5                           |
+*/
 
 -- 3.How many successful orders were delivered by each runner?
 SELECT runner_id, COUNT(order_id) as successful_orders
@@ -48,6 +60,14 @@ FROM cleaned_runner_orders
 WHERE cancellation IS NULL OR
 cancellation NOT IN ('Restaurant Cancellation','Customer Cancellation')
 GROUP BY runner_id;
+
+/*
+    | RUNNER_ID | SUCCESSFUL_ORDERS|
+    |-----------|------------------|          
+    |   1       |       4          |
+    |   2       |       3          |
+    |   3       |       1          |
+*/
 
 -- 4. How many of each type of pizza was delivered?
 WITH successful_orders AS(
@@ -60,6 +80,16 @@ FROM updated_customer_orders
 JOIN successful_orders ON updated_customer_orders.order_id = successful_orders.order_id
 JOIN pizza_names ON updated_customer_orders.pizza_id = pizza_names.pizza_id
 GROUP BY updated_customer_orders.pizza_id, pizza_names.pizza_name;
+
+/*
+    | PIZZA_ID  | PIZZA_NAME | NUMBER_OF_ORDERS |
+    |-----------|------------|------------------|          
+    |   2       | Vegetarian |        3         |
+    |   1       |Meat Lovers |        9         |
+   
+*/
+
+
  
 -- 5.How many Vegetarian and Meatlovers were ordered by each customer?
 SELECT customer_id,
@@ -67,6 +97,14 @@ SELECT customer_id,
     COUNT(CASE WHEN pizza_id = 2 THEN 1 END) as Vegetarian
 FROM updated_customer_orders
 GROUP BY customer_id;
+
+/*
+    | PIZZA_ID  | PIZZA_NAME | NUMBER_OF_ORDERS |
+    |-----------|------------|------------------|          
+    |   2       | Vegetarian |        3         |
+    |   1       |Meat Lovers |        9         |
+   
+*/
 
 -- 6. What was the maximum number of pizzas delivered in a single order?
 
@@ -83,10 +121,11 @@ FROM (
     ON updated_customer_orders.order_id = successful_orders.order_id
     GROUP BY updated_customer_orders.order_id
 );
-
-SELECT *
-FROM updated_customer_orders
-WHERE (exclusions IS NOT NULL) AND (extras IS NOT NULL);
+/* 
+    |MAX_PIZZA_DELIVERED |
+    |--------------------|        
+    | 3                  |
+*/
 
 
 -- 8.How many pizzas were delivered that had both exclusions and extras?
@@ -103,6 +142,14 @@ WHERE (uco.exclusions IS NOT NULL) AND
 (uco.extras IS NOT NULL)
 GROUP BY uco.pizza_id;
 
+/*
+    | PIZZA_ID  | DELIVERED_PIZZA_COUNT|
+    |-----------|----------------------|          
+    |   1       |       1              |
+*/
+
+
+
 /*9. What was the total volume of pizzas ordered for each hour of the day?
 
 For a given hour, how many pizzas were ordered? one way to solve this would be to extract the hour part from the given 
@@ -117,12 +164,37 @@ GROUP BY hour_of_day
 ORDER BY hour_of_day;
 
 
+/*
+    | HOUR_OF_DAY | PIZZAS_ORDERED|
+    |-------------|------------------|          
+    |   11        |       1          |
+    |   13        |       3          |
+    |   18        |       3          |
+    |   19        |       1          |
+    |   21        |       3          |
+    |   23        |       3          |
+*/
+
+
 --10. What was the volume of orders for each day of the week?
 
 SELECT TO_CHAR(order_time,'Dy') as day_of_Week, COUNT(pizza_id) as pizza_count
 FROM updated_customer_orders
 GROUP BY day_of_Week
 ORDER BY pizza_count;
+
+
+/*
+    | DAY_OF_WEEK | PIZZA_COUNT      |
+    |-------------|------------------|          
+    |   Fri       |       1          |
+    |   Thu       |       3          |
+    |   Wed       |       5          |
+    |   Sat       |       5          |
+
+*/
+
+
 
 
                                 /* RUNNER AND CUSTOMER EXPERIENCE */
